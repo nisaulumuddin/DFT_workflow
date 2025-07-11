@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Union
 
-from config.config import Config as DefaultPath
+from mydftlib.config.config import Config as DefaultPath
 
 from ase.build import add_vacuum
 
@@ -28,7 +28,7 @@ def gamma_struct(
     structure : str or ASE Atoms
         CIF file path or ASE Atoms object.
     interlayer_shift : float
-        Additional z-coordinate shift for the sliding layer.
+        Additional z-coordinate shift for the sliding layer in Angstrom
     increments : float
         Number of increments along x and y displacement (default: 10).
     duplicate_z : int

@@ -4,7 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from config.config import Config as DefaultPath
+from mydftlib.config.config import Config as DefaultPath
 
 # other upcoming functions: import from MaterialsProject
 
