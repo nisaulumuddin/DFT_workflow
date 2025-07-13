@@ -18,7 +18,7 @@ def gamma_struct(
     shift_plane: float = 0.5,
     write_file: bool = True,
     dft_workflow_root: Path = DefaultPath.DFT_WORKFLOW_ROOT,
-    write_dir: Union[str, Path] = "GAMMA_SURF",
+    write_dir: Union[str, Path] = Path("GAMMA_SURF"),
 ) -> list[tuple[float, float, float]]:
     """
     Generalized Gamma surface POSCAR generator
@@ -72,9 +72,9 @@ def gamma_struct(
             
             
             if write_file:
-                out_file = dft_workflow_root / write_dir / f"poscar_x_{round(x, 2)}_y_{round(y, 2)}.vasp"
+                out_file =  write_dir / f"poscar_x_{round(x, 2)}_y_{round(y, 2)}.vasp"
                 out_file.parent.mkdir(parents=True, exist_ok=True)  # Make sure the directory exists
-                io.write(out_file, atoms, format="cif")
+                io.write(out_file, atoms, format=struct_format)
 
 
 
@@ -89,7 +89,7 @@ def gsfe_struct(
     shift_plane: float = 0.5,
     write_file: bool = True,
     dft_workflow_root: Path = DefaultPath.DFT_WORKFLOW_ROOT,
-    write_dir: Union[str, Path] = 'GSFE',
+    write_dir: Union[str, Path] = Path('GSFE'),
 ) -> list[tuple[float, float, float]]:
     """
     Generalized GSFE POSCAR generator
@@ -145,7 +145,9 @@ def gsfe_struct(
         atoms.wrap()
 
         if write_file:
-            out_file = dft_workflow_root / write_dir / f"poscar_x_{round(x, 2)}_y_{round(y, 2)}.vasp"
+            print(f"writing poscar_x_{round(x, 2)}_y_{round(y, 2)}.vasp in {write_dir}")
+            out_file = write_dir / f"poscar_x_{round(x, 2)}_y_{round(y, 2)}.vasp"
             out_file.parent.mkdir(parents=True, exist_ok=True)  # Make sure the directory exists
-            io.write(out_file, atoms,format="cif")
+            io.write(out_file, atoms,format=struct_format)
+    return out_file
 

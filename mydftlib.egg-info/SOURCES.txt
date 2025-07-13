@@ -1,0 +1,6 @@
+README.md
+setup.py
+mydftlib.egg-info/PKG-INFO
+mydftlib.egg-info/SOURCES.txt
+mydftlib.egg-info/dependency_links.txt
+mydftlib.egg-info/top_level.txt

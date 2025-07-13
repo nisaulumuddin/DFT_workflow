@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: mydftlib
+Version: 0.1
+Summary: A DFT workflow Python package
+Author: Your Name
+Author-email: you@example.com
+Requires-Python: >=3.11
