@@ -75,10 +75,10 @@ class POSCAR:
                 
                 # Get atomic positions and fixation data if it exists
                 if self.selective_dynamics:
-                        self.pos_data = np.array(self.file_data[9:])[:,:3].astype(np.float64)
-                        self.fixation_data = np.array(self.file_data[9:])[:,3:]
+                        self.pos_data = np.array(self.file_data[9: 9 + self.atom_count])[:,:3].astype(np.float64)
+                        self.fixation_data = np.array(self.file_data[9: 9 + self.atom_count ])[:,3:]
                 else:
-                        self.pos_data = np.array(self.file_data[8:]).astype(np.float64)
+                        self.pos_data = np.array(self.file_data[8: 8 + self.atom_count ])[:,:3].astype(np.float64)
                         self.fixation_data = None
         
                 
@@ -142,12 +142,9 @@ class POSCAR:
                 self.fixation_data = new_fix
                 return self.pos_data , self.fixation_data
 
-        # Fix and relax user-specified atomic layers within a structure (number = number of layers, direction: upper/lower/both,  setup : relax/fix/custom) 
-        def setup_layers(self,  number, direction, setup):
-                 
+        # Fix and relax user-specified atomic layers within a structure (surface_upper = number of upper surface layers , surface_lower = number of lower surface layers, flags : 'F F F', 'F F T' etc. ) 
+        def setup_layers(self, freeze_top_n_layers, freeze_bottom_n_layers, relax_flag):
                 orig_posn = deepcopy(self.pos_data)
-                atom_list = self.atom_list
-                elm_count = deepcopy(self.atom_header[1])
                 
                 reordered_posn, reordered_fix  = deepcopy(self.reorder_coord('d'))
 
@@ -160,40 +157,20 @@ class POSCAR:
                         reordered_fix = np.array(reordered_fix)
                         reordered_fix = reordered_fix.reshape(np.shape(reordered_posn))
                         
-                ref_order = orig_posn[orig_posn[:,2].argsort()][::-1]
-                unique_z = np.unique(ref_order[:,2])
-
-                if direction.startswith('u') or direction.startswith('U'): # if upper layers need to be fixed:
-                        unique_z = unique_z[unique_z.argsort()]
-                        ref_z = unique_z[0:number]
-                elif direction.startswith('l') or direction.startswith('L'):  # if lower layers need to be fixed
-                        unique_z = unique_z[unique_z.argsort()][::-1]  
-                        ref_z = unique_z[0:number]
-                elif direction.startswith('b') or direction.startswith('B'):  # if both lower and upper layers need to be fixed
-                        unique_z = unique_z[unique_z.argsort()]
-                        ref_z.append(unique_z[0:number])
-                        unique_z = unique_z[unique_z.argsort()][::-1]
-                        ref_z.append( unique_z[0:number])
-                else:
-                        print("incomplete arguments")
-
-                if setup.startswith('f') or setup.startswith('F'):
-                        fix = ['F','F','F']
-                elif setup.startswith('r') or setup.startswith('R'):
-                        fix = ['T','T','T']
-                elif setup.startswith('c') or setup.startswith('C'):
-                        inp = input('please specify F/T in the x,y,z direction: ') 
-                        fix = np.array(inp)
-                else: 
-                        print("incomplete arguments")   
-
+                # descending_atoms = orig_posn[orig_posn[:,2].argsort()][::-1]
+                rounded_z = np.round(orig_posn[:, 2], decimals=3)
+                unique_z = np.unique(rounded_z)
+                
+                unique_z = unique_z[unique_z.argsort()] # ascending order
+                fix_lower_z = unique_z[freeze_bottom_n_layers]
+                unique_z = unique_z[unique_z.argsort()][::-1] # descending order
+                fix_upper_z = unique_z[freeze_top_n_layers]
 
                 for ind, posn in enumerate(reordered_posn):
-                        if posn[2] in ref_z:
-                                reordered_fix[ind] = fix
-
-
-                
+                        if posn[2] > fix_upper_z or posn[2] < fix_lower_z:
+                                reordered_fix[ind] = ['F','F','F']
+                        else:
+                                reordered_fix[ind] = relax_flag.split()
 
                 self.fixation_data = reordered_fix
                 self.pos_data = reordered_posn 

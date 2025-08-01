@@ -4,8 +4,7 @@ import numpy as np
 import os
 from pathlib import Path
 from typing import Union
-from mydftlib.core.POSCAR import POSCAR
-from ase.io import read,write
+
 from mydftlib.config.config import Config as DefaultPath
 
 from ase.build import add_vacuum
@@ -29,11 +28,13 @@ def gamma_struct(
     structure : str or ASE Atoms
         CIF file path or ASE Atoms object.
     interlayer_shift : float
-        z-coordinate of the sliding layer in Angstrom
+        Additional z-coordinate shift for the sliding layer in Angstrom
     increments : float
         Number of increments along x and y displacement (default: 10).
     duplicate_z : int
         Number of repetitions along z.
+    shift_plane : float
+        Fractional height (0–1) of the plane to shift atoms above.
     write_file : bool
         If True, writes displaced structures to file.
     write_dir : str or Path
@@ -52,7 +53,7 @@ def gamma_struct(
     lattice_vectors = atoms.cell
 
     limits = atoms.cell.lengths()
-    z_mid = interlayer_shift
+    z_mid = limits[2] * shift_plane + interlayer_shift
     areaxy = np.linalg.norm(np.cross(lattice_vectors[0] , lattice_vectors[1]))    
 
     # Displacement ranges
@@ -85,6 +86,7 @@ def gsfe_struct(
     xmax : float = 1.0,
     ymax : float = 0.0,
     duplicate_z: int = 10,
+    shift_plane: float = 0.5,
     write_file: bool = True,
     dft_workflow_root: Path = DefaultPath.DFT_WORKFLOW_ROOT,
     write_dir: Union[str, Path] = Path('GSFE'),
@@ -97,7 +99,7 @@ def gsfe_struct(
     structure : str or ASE Atoms
         CIF file path or ASE Atoms object.
     interlayer_shift : float
-        The z-coordinate for the sliding layer.
+        Additional z-coordinate shift for the sliding layer.
     increments : float
         Number of increments along x and y displacement (default: 10).
     xmax : float
@@ -125,7 +127,8 @@ def gsfe_struct(
     original_positions = atoms.get_positions()
     lattice_vectors = atoms.cell
 
-    z_mid = interlayer_shift
+    limits = atoms.cell.lengths()
+    z_mid = limits[2] * shift_plane + interlayer_shift
     areaxy = np.linalg.norm(np.cross(lattice_vectors[0] , lattice_vectors[1]))    
 
     # Displacement ranges
@@ -148,34 +151,3 @@ def gsfe_struct(
             io.write(out_file, atoms,format=struct_format)
     return out_file
 
-def create_needle(
-    structure: Union[str, Atoms],
-    struct_format: str = 'vasp',
-    duplicate_z: int = 10,
-    write_file: bool = True,
-    write_dir: Union[str, Path] = Path('INI'),
-):
-    atoms = io.read(structure,format = struct_format) if isinstance(structure, (str,Path)) else structure.copy()
-    atoms = atoms.repeat((1, 1, duplicate_z))
-    add_vacuum(atoms,vacuum=10)
-    
-    if write_file:
-        out_file = write_dir / f"POSCAR"
-        out_file.parent.mkdir(parents=True, exist_ok=True)  # Make sure the directory exists
-        io.write(out_file, atoms,format=struct_format)
-    return atoms
-
-
-def apply_selectivedynamics(structure, freeze_top_n_layers, freeze_bottom_n_layers, relax_flag):
-    
-    if isinstance(structure, (str,Path)):
-        poscar = POSCAR(structure) 
-    else:
-        write('POSCAR', structure, format='vasp', vasp5=True, direct=False)
-        poscar = POSCAR('POSCAR')
-    
-    poscar.pos_data, poscar.fixation_data  = poscar.setup_layers(freeze_top_n_layers, freeze_bottom_n_layers, relax_flag)
-    poscar.write_out('POSCAR')
-    atoms = read("POSCAR", format="vasp")
-    return atoms
-    
