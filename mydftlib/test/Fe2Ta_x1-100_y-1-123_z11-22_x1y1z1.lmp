@@ -1,0 +1,8 @@
+ # FeTa2 with C14 Laves structure with box vectors H1=[1-100], H2=[-1-123], H3=[11-22].
+  
+         120  atoms
+           2  atom types
+ 
+      0.000000000000       8.234061789387  xlo xhi
+      0.000000000000       9.111450450508  ylo yhi
+      0.000000000000      20.277822958039  zlo zhi

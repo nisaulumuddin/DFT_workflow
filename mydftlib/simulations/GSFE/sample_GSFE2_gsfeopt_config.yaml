@@ -1,0 +1,26 @@
+poscar: CONTCAR_Fe7Ta6_x1y1z5_nm
+folder: GSFE_dir11-20
+
+gsfe:
+  struct_format: vasp
+  interlayer_shift: 70.4
+  increments: 10
+  vacuum: 0.0
+  xmax: 4.8576272320999996
+  ymax: 0.0
+  duplicate_z: 1
+  freeze_layers: 6
+
+incar:
+  NPAR: 16
+  AMIN: 0.01
+  ENCUT: 500
+  PREC: Accurate
+
+kpoints:
+  centering: Gamma
+  grid: 5 5 1
+
+distribution:
+  poscar_glob: poscar_x_*
+  raw_dir: raw_inputs

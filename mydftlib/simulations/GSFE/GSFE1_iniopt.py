@@ -19,50 +19,54 @@ from mydftlib.core.KPOINTS import KPOINTS
 from mydftlib.core.POTCAR import create_POTCAR_from_poscar
 from mydftlib.structures.GSFE import create_needle, apply_selectivedynamics
 from mydftlib.utilities.setupcalc import  wipe_to_raw
+import yaml
+from pathlib import Path
 
-def main():
-    ini_dir = Path("INI")
+def main(
+    config_file : str = None,
+    ):
+    
+    cfg = yaml.safe_load(open(config_file))
+    ini_dir = Path(cfg["folder"])
+    ini_dir.mkdir(exist_ok=True)
 
-
-    # Step 1: Generate POSCAR
     atoms = create_needle(
-        structure='CONTCAR_Ta6Fe7_fo_unit',
+        structure=cfg['structure'],
         struct_format='vasp',
-        duplicate_z=4,
+        duplicate_z=cfg['duplicate_z'],
+        vacuum=cfg['vacuum'],
         write_dir=ini_dir,
         write_file=False,
     )
 
     atoms = apply_selectivedynamics(
-        structure= atoms, 
-        freeze_top_n_layers=6, 
-        freeze_bottom_n_layers=6, 
-        relax_flag='T T T') 
-    
-    # Now write POSCAR with selective dynamics flags included
-    write('INI/POSCAR', atoms, format='vasp', vasp5=True, direct=False)
-    
-    # Step 3: Create INCAR
-    incar = INCAR.generate_default_incar()
-    incar.set_tag('ISPIN', '1')
-    # incar.set_tag('MAGMOM', '18*0  21*3  18*0  21*3  18*0  21*3  18*0  21*3')
-    incar.set_tag('NPAR', '16')
-    incar.write_out('INCAR', folder=ini_dir)
+        structure=atoms, 
+        freeze_top_n_layers=cfg['freeze_top_n_layers'], 
+        freeze_bottom_n_layers=cfg['freeze_bottom_n_layers'], 
+        relax_flag=cfg['relax_flag']
+    )
+    poscar_path = ini_dir / 'POSCAR'
+    write(poscar_path, atoms, format='vasp', vasp5=True, direct=False)
 
-    # Step 4: Create POTCAR
+    incar = INCAR.generate_default_incar()
+    
+    for tag, value in cfg["incar"].items():
+        incar.set_tag(tag, str(value))
+    incar.write_out("INCAR", folder=ini_dir)
+
     create_POTCAR_from_poscar(poscar_path=ini_dir / 'POSCAR', target_dir=ini_dir)
 
-    # Step 5: Create KPOINTS
     kpoints = KPOINTS.generate_default_kpoints()
-    kpoints.set_centering('Gamma')
-    kpoints.set_grid('5 5 1')
+    kpoints.set_centering(cfg['kcentering'])
+    kpoints.set_grid(cfg['kgrid'])
     kpoints.write_out('KPOINTS', folder=ini_dir)
 
-    print(f"Folder {ini_dir} is now ready for VASP")
-    
-    # Step 6: Tidy up files
     wipe_to_raw('INCAR','KPOINTS','POSCAR')
-    
-    
+    print(f"Folder {ini_dir} is now ready for VASP")
+
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) != 2:
+        print("Usage: ./GSFE1_iniopt.py config.yaml")
+        sys.exit(1)
+    main(sys.argv[1])

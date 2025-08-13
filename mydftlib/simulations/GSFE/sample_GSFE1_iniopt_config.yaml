@@ -1,0 +1,16 @@
+structure: CONTCAR_Nb6Co7_nm_unit
+duplicate_z: 4
+vacuum: 15.0
+freeze_top_n_layers: 6
+freeze_bottom_n_layers: 6
+relax_flag: T T T
+folder: 'INI'
+
+incar:
+  ISPIN: 1
+  NPAR: 16
+  ENCUT: 500
+  PREC: Accurate
+
+kcentering : gamma
+kgrid : 5 5 1

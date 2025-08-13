@@ -1,0 +1,44 @@
+- system: basal
+  plane: [0, 0, 0, 1]
+  direction1: [1, 1, -2, 0]
+  direction2: [1, -1, 0, 0]
+
+- system: pristmatic I(10-10)
+  plane: [1,0,-1,0]
+  direction1: [1,-2,1,0]
+  direction2: [0,0,0,1]
+
+- system: pristmatic II (11-20)
+  plane: [1,1,-2,0]
+  direction1: [1,-1,0,0]
+  direction2: [0,0,0,1]
+
+- system: pyramidal I (20-21)
+  plane: [2,0,-2,1]
+  direction1: [1,-2,1,0]
+  direction2: [-1,0,1,4]
+
+- system: pyramidal I (10-11)
+  plane: [1,0,-1,1]
+  direction1: [1,-2,1,0]
+  direction2: [-1,0,1,2]
+
+- system: pyramidal I (10-12)
+  plane: [1,0,-1,2]
+  direction1: [1,-2,1,0]
+  direction2: [-1,0,1,1]
+
+- system: pyramidal II (11-21)
+  plane: [1,1,-2,1]
+  direction1: [1,-1,0,0]
+  direction2: [-1,-1,2,6]
+
+- system: pyramidal II (11-22)
+  plane: [1,1,-2,2]
+  direction1: [1,-1,0,0]
+  direction2: [-1,-1,2,3]
+
+- system: pyramidal II (11-23)
+  plane: [1,1,-2,3]
+  direction1: [1,-1,0,0]
+  direction2: [-1,-1,2,2]
